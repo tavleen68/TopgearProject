@@ -31,4 +31,32 @@ node{
          bat "${tomcatBin}\\startup.bat"
          sleep(time:100,unit:"SECONDS")
    }
+   stage('Build Docker Imager'){
+   sh 'docker build -t tavleen/myweb:0.0.1 .'
+ }
+ 
+ stage('Push to Docker Hub'){
+ 
+	 withCredentials([string(credentialsId: 'github-pwd', variable: 'dockerHubPwd')]) {
+        sh "docker login -u tavleen -p ${dockerHubPwd}"
+     }
+	 sh 'docker push tavleen/myweb:0.0.1'
+ }
+ stage('Remove Previous Container'){
+	try{
+		def dockerRm = 'docker rm -f myweb'
+		sshagent(['docker-dev']) {
+			sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.196 ${dockerRm}"
+		}
+	}catch(error){
+		//  do nothing if there is an exception
+	}
+ }
+ stage('Deploy to Dev Environment'){
+   def dockerRun = 'docker run -d -p 8080:8080 --name myweb tavleen/myweb:0.0.1 '
+   sshagent(['docker-dev']) {
+    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.196 ${dockerRun}"
+   }
+
+ }
 }
