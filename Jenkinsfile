@@ -9,7 +9,7 @@ node{
    stage('Compile-Package-create-war-file'){
       // Get maven home path
       def mvnHome =  tool name: 'MAVEN_HOME', type: 'maven'   
-      bat "${mvnHome}/bin/mvn package"
+      sh "${mvnHome}/bin/mvn package"
       }
 /*   stage ('Stop Tomcat Server') {
                bat ''' @ECHO OFF
@@ -24,11 +24,11 @@ node{
 '''
    }*/
    stage('Deploy to Tomcat'){
-     bat "copy target\\SampleMavenWebproject.war \"${tomcatWeb}\\SampleMavenWebproject.war\""
+     sh "copy target\\SampleMavenWebproject.war \"${tomcatWeb}\\SampleMavenWebproject.war\""
    }
       stage ('Start Tomcat Server') {
          sleep(time:5,unit:"SECONDS") 
-         bat "${tomcatBin}\\startup.bat"
+         sh "${tomcatBin}\\startup.bat"
          sleep(time:100,unit:"SECONDS")
    }
 }
